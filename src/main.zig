@@ -30,6 +30,7 @@ pub fn main() anyerror!void {
 
   try router.handle_func_unbound("/", handlers.root);
   try router.handle_func_unbound("/start", handlers.start);
+  try router.handle_func_unbound("/move", handlers.move);
 
   var listener = zap.HttpListener.init(.{
     .port = res.args.port.?,
