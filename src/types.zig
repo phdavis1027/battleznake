@@ -80,8 +80,8 @@ pub const CellBoard = struct {
 // TODO: Considering how you can pack this 
 // as much as possible
 pub const Cell = struct {
-  snake_id: u8,
-  next_idx: u8,
+  snakeId: u8,
+  nextIdx: u8,
   food: bool,
   hazard: bool,
 };

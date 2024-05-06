@@ -2,10 +2,15 @@ const std = @import("std");
 const clap = @import("clap");
 const zap = @import("zap");
 const handlers = @import("handlers.zig");
+const logic = @import("logic.zig");
 
 
 pub fn main() anyerror!void {
-  const allocator = std.heap.page_allocator;
+  var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+  const allocator = gpa.allocator();
+  defer {
+    _ = gpa.deinit();
+  }
 
   // const init_log = std.log.scoped(.init);
 
@@ -28,9 +33,11 @@ pub fn main() anyerror!void {
     .not_found = handlers.not_found
   }); 
 
+  var snake = logic.Snake.init(allocator);
+
   try router.handle_func_unbound("/", handlers.root);
-  try router.handle_func_unbound("/start", handlers.start);
-  try router.handle_func_unbound("/move", handlers.move);
+  try router.handle_func("/start", &snake, &logic.Snake.initGameState);
+  try router.handle_func("/move", &snake, &logic.Snake.makeMove);
 
   var listener = zap.HttpListener.init(.{
     .port = res.args.port.?,

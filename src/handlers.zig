@@ -13,31 +13,6 @@ pub fn not_found(req: zap.Request) void {
   not_found_logger.info("Not found: {s}", .{req.path.?});
 }
 
-const start_logger = std.log.scoped(.start);
-pub fn start(r: zap.Request) void {
-  const pga = std.heap.page_allocator;
-  const started = std.json.parseFromSlice(types.Started, pga, r.body.?, .{.ignore_unknown_fields = true}) 
-    catch |de_err| {
-      r.setStatus(zap.StatusCode.bad_request);
-      r.sendJson(
-        \\ {
-        \\   "error": "Invalid JSON"
-        \\ }
-      ) catch |reply_err| {
-        start_logger.err("Failed to send error response: {}", .{reply_err});
-        start_logger.err("Invalid JSON: {s}, error: {}", .{r.body.?, de_err});
-        return;
-      };
-
-
-      start_logger.err("Invalid JSON: {}", .{de_err});
-      return;
-    };
-
-  start_logger.info("Starting game: {}", .{started});
-
-}
-
 const root_logger = std.log.scoped(.root);
 pub fn root(r: zap.Request) void {
   r.setStatus(zap.StatusCode.ok);
@@ -48,28 +23,4 @@ pub fn root(r: zap.Request) void {
   ) catch return;
 
   root_logger.info("Initializing snake", .{});
-}
-
-const move_logger = std.log.scoped(.move);
-pub fn move(r: zap.Request) void {
-  const pga = std.heap.page_allocator;
-  const moveIn = std.json.parseFromSlice(types.MoveIn, pga, r.body.?, .{.ignore_unknown_fields = true}) 
-    catch |de_err| {
-      r.setStatus(zap.StatusCode.bad_request);
-      r.sendJson(
-        \\ {
-        \\   "error": "Invalid JSON"
-        \\ }
-      ) catch |reply_err| {
-        start_logger.err("Failed to send error response: {}", .{reply_err});
-        start_logger.err("Invalid JSON: {s}, error: {}", .{r.body.?, de_err});
-        return;
-      };
-
-
-      start_logger.err("Invalid JSON: {}", .{de_err});
-      return;
-    };
-
-  logic.handleMove(&r, &moveIn.value);  
 }
